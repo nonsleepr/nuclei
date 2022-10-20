@@ -2,6 +2,7 @@ package dsl
 
 import (
 	"bytes"
+	"compress/flate"
 	"compress/gzip"
 	"compress/zlib"
 	"crypto/aes"
@@ -220,6 +221,30 @@ func init() {
 			if err != nil {
 				return "", err
 			}
+			data, err := io.ReadAll(reader)
+			if err != nil {
+				_ = reader.Close()
+				return "", err
+			}
+			_ = reader.Close()
+			return string(data), nil
+		}),
+		"deflate": makeDslFunction(1, func(args ...interface{}) (interface{}, error) {
+			buffer := &bytes.Buffer{}
+			writer, err := flate.NewWriter(buffer, -1)
+			if err != nil {
+				return "", err
+			}
+			if _, err = writer.Write([]byte(args[0].(string))); err != nil {
+				_ = writer.Close()
+				return "", err
+			}
+			_ = writer.Close()
+
+			return buffer.String(), nil
+		}),
+		"inflate": makeDslFunction(1, func(args ...interface{}) (interface{}, error) {
+			reader := flate.NewReader(strings.NewReader(args[0].(string)))
 			data, err := io.ReadAll(reader)
 			if err != nil {
 				_ = reader.Close()

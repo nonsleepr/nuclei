@@ -107,6 +107,7 @@ func TestGetPrintableDslFunctionSignatures(t *testing.T) {
 	contains_any(body interface{}, substrs ...string) bool
 	date_time(dateTimeFormat string, optionalUnixTime interface{}) string
 	dec_to_hex(arg1 interface{}) interface{}
+	deflate(arg1 interface{}) interface{}
 	ends_with(str string, suffix ...string) bool
 	generate_java_gadget(arg1, arg2, arg3 interface{}) interface{}
 	gzip(arg1 interface{}) interface{}
@@ -117,6 +118,7 @@ func TestGetPrintableDslFunctionSignatures(t *testing.T) {
 	hmac(arg1, arg2, arg3 interface{}) interface{}
 	html_escape(arg1 interface{}) interface{}
 	html_unescape(arg1 interface{}) interface{}
+	inflate(arg1 interface{}) interface{}
 	join(separator string, elements ...interface{}) string
 	len(arg1 interface{}) interface{}
 	line_ends_with(str string, suffix ...string) bool
@@ -250,6 +252,9 @@ func TestDslExpressions(t *testing.T) {
 		`uniq("abcabdaabbccd")`:                                   "abcd",
 		`uniq("ab", "cd", "12", "34", "12", "cd")`:                []string{"ab", "cd", "12", "34"},
 		`join(" ", uniq("ab", "cd", "12", "34", "12", "cd"))`:     "ab cd 12 34",
+		`deflate("Hello")`:                                        "\xf2\x48\xcd\xc9\xc9\x07\x04\x00\x00\xff\xff",
+		`inflate(hex_decode("f348cdc9c90700"))`:                   "Hello",
+		`inflate(hex_decode("f248cdc9c907040000ffff"))`:           "Hello",
 	}
 
 	testDslExpressionScenarios(t, dslExpressions)
